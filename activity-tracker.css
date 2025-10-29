@@ -1,0 +1,9 @@
+/* Minimal CSS required by the specification tests */
+
+/* Ensure the timeline content area is scrollable with a fixed max height */
+.timeline-content {
+    overflow-y: auto;
+    max-height: 350px;
+}
+
+
