@@ -5,13 +5,59 @@ class ActivityTracker {
         // Session Configuration Settings
         this.STORAGE_KEY = 'activity-tracker-data';
         this.SESSION_TIMEOUT = 60 * 60 * 1000;
-
-        // Load or Generate new session
         this.sessionData = this.loadOrGenerateSession();
 
         this.renderWidget();
+        this.renderExistingTrackingEvents();
+        this.renderStats();
+
+        this.recordPageView();
         this.addUpEventListeners();
+
     }
+
+    renderExistingTrackingEvents() {
+        if (!Array.isArray(this.sessionData.events)) return;
+        for (const events of this.sessionData.events) this.appendTimelineItem(events);
+    }
+
+    appendTimelineItem(events) {
+        const timeLineElement = document.querySelector('.timeline-wrapper');
+        const time = this.formatTime(new Date(events.time));
+        const cls = events.type === 'pageview' ? 'pageview' : 'interaction';
+        const title = events.type === 'pageview' ? 'Page View' : 'Interaction';
+        // only interactions have details
+        const details = events.type === 'pageview' ? `Visited: ${events.page}` : events.details;
+
+        const html = `
+                <div class="timeline-item ${cls}">
+                    <div class="time">${time}</div>
+                    <div class="event-title">${title}</div>
+                    <div class="event-details">${details}</div>
+                </div>`;
+
+        timeLineElement.innerHTML += html;
+    }
+
+    renderStats() {
+        const durationElm = document.querySelector('.session-stats .stat:nth-child(1) .stat-value');
+        const pagesElm = document.querySelector('.session-stats .stat:nth-child(2) .stat-value');
+        const clicksElm = document.querySelector('.session-stats .stat:nth-child(3) .stat-value');
+        const formsElm = document.querySelector('.session-stats .stat:nth-child(4) .stat-value');
+
+        if (!durationElm || !pagesElm || !clicksElm || !formsElm) {
+            return;
+        };
+
+        const mins = Math.floor((Date.now() - this.sessionData.startedAt) / 60000);
+        
+        durationElm.textContent = `${mins} min`;
+        pagesElm.textContent = String(this.sessionData.stats.pagesViewed);
+        clicksElm.textContent = String(this.sessionData.stats.totalClicks);
+        formsElm.textContent = String(this.sessionData.stats.formsSubmitted);
+    }
+
+
 
     loadOrGenerateSession() {
         const storedSession = localStorage.getItem(this.STORAGE_KEY);
@@ -40,13 +86,14 @@ class ActivityTracker {
             sessionId: this.generateSessionId(),
             startedAt: Date.now(),
             lastActivity: Date.now(),
+            stats: {
+                pagesViewed: 0,
+                totalClicks: 0,
+                formsSubmitted: 0,
+            },
             events: [
-                {
-                    "type": "pageview", "page": "index.html", "time": 1727895123456
-                },
-                {
-                    "type": "interaction", "details": "Clicked link: Shop Now", "time": 1727895130000
-                }
+                // sampe format pageview: { "type": "pageview", "page": "index.html", "time": 1727895123456}
+                // sampe format interaction: { "type": "interaction", "details": "Clicked link: Shop Now", "time": 1727895130000}
             ],
         };
 
@@ -66,6 +113,56 @@ class ActivityTracker {
         button.addEventListener('click', () => {
             timeline.classList.toggle('expanded');
         });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-primary')) {
+                this.recordInteraction('Clicked link: Shop Now');
+                this.appendTimelineItem(event);
+                this.renderStats();
+            }
+
+        }, true);
+
+        document.addEventListener('submit', (e) => {
+            this.recordInteraction('Submitted form');
+            this.appendTimelineItem(event);
+            this.renderStats();
+        }, true);
+
+
+    }
+
+    recordPageView() {
+        const page = location.pathname.split('/').pop() || 'index.html';
+        const event = {
+            type: 'pageview',
+            page: page,
+            time: Date.now(),
+        };
+
+        this.sessionData.events.push(event);
+        this.sessionData.stats.pagesViewed++;
+        this.sessionData.lastActivity = Date.now();
+        this.saveSession();
+    }
+
+    recordInteraction(details) {
+        const event = {
+            type: 'interaction',
+            details: details,
+            time: Date.now(),
+        };
+
+        this.sessionData.events.push(event);
+
+        if (details.startsWith('Clicked link')) {
+            this.sessionData.stats.totalClicks++;
+        } else if (details === 'Submitted form') {
+            this.sessionData.stats.formsSubmitted++;
+        }
+
+        this.saveSession();
+
     }
 
     generateSessionId() {
@@ -105,7 +202,7 @@ class ActivityTracker {
                 </div>
                 <div class="stat">
                     <div class="stat-label">Pages Viewed</div>
-                    <div class="stat-value">1</div>
+                    <div class="stat-value">0</div>
                 </div>
                 <div class="stat">
                     <div class="stat-label">Total Clicks</div>
@@ -118,14 +215,7 @@ class ActivityTracker {
                 </section>
 
                 <div class="timeline-content">
-                <div class="timeline-wrapper">
-                    <!-- timeline-item entries appended here -->
-                    <div class="timeline-item pageview">
-                    <div class="time">14:22:20</div>
-                    <div class="event-title">Page View</div>
-                    <div class="event-details">Visited: index.html — 45% viewed</div>
-                    </div>
-                </div>
+                <div class="timeline-wrapper"></div>
                 </div>
             </aside>
             </div>
@@ -133,8 +223,8 @@ class ActivityTracker {
 
         document.body.innerHTML += widgetHTML;
     }
-}
 
+}
 
 
 // Export the class

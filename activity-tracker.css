@@ -1,11 +1,15 @@
+.timeline-content {
+    overflow-y: auto;
+    max-height: 350px;
+}
+
 .activity-tracker-widget {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: white;
     padding: 5px;
     border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
 }
 
 .activity-tracker-button {
@@ -18,13 +22,81 @@
 
 .activity-tracker-timeline {
     display: none;
+    flex-direction: column;
+    width: 380px;
+    max-height: 500px;
+    background: white;
+    border-radius: 8px;
 }
 
 .activity-tracker-timeline.expanded {
-    display: block;
+    display: flex;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.timeline-content {
-    overflow-y: auto;
-    max-height: 350px;
+
+.activity-tracker-button:hover {
+    transform: scale(1.1);
 }
+
+.timeline-header {
+    margin: 10px;
+    padding: 8px;
+    background: #f5f5f5;
+}
+
+.timeline-header h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+}
+
+.session-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 10px;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: blue;
+}
+
+.timeline-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    border-left: 5px solid green;
+}
+
+.timeline-item.interaction {
+    border-left: 5px solid orange;
+}
+
+.time {
+    color: #aaa;
+    font-size: 12px;
+}
+
+.event-title {
+    font-weight: bold;
+}
+
+.event-details {
+    color: #aaa;
+    font-size: 12px;
+}
+
+/* 11 */
