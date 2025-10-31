@@ -115,10 +115,11 @@ class ActivityTracker {
         });
 
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.btn-primary')) {
-                this.recordInteraction('Clicked link: Shop Now');
+            const button = e.target.closest('.btn-primary');
+            if (button) {
+                const label = button.textContent.trim();
+                this.recordInteraction(`Clicked button: ${label}`);
             }
-
         }, true);
 
         document.addEventListener('submit', (e) => {
