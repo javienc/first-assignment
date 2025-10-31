@@ -50,7 +50,7 @@ class ActivityTracker {
         };
 
         const mins = Math.floor((Date.now() - this.sessionData.startedAt) / 60000);
-        
+
         durationElm.textContent = `${mins} min`;
         pagesElm.textContent = String(this.sessionData.stats.pagesViewed);
         clicksElm.textContent = String(this.sessionData.stats.totalClicks);
@@ -115,18 +115,14 @@ class ActivityTracker {
         });
 
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('btn-primary')) {
+            if (e.target.closest('.btn-primary')) {
                 this.recordInteraction('Clicked link: Shop Now');
-                this.appendTimelineItem(event);
-                this.renderStats();
             }
 
         }, true);
 
         document.addEventListener('submit', (e) => {
             this.recordInteraction('Submitted form');
-            this.appendTimelineItem(event);
-            this.renderStats();
         }, true);
 
 
@@ -144,6 +140,8 @@ class ActivityTracker {
         this.sessionData.stats.pagesViewed++;
         this.sessionData.lastActivity = Date.now();
         this.saveSession();
+        this.appendTimelineItem(event);
+        this.renderStats();
     }
 
     recordInteraction(details) {
@@ -161,8 +159,10 @@ class ActivityTracker {
             this.sessionData.stats.formsSubmitted++;
         }
 
+        this.sessionData.lastActivity = Date.now();
         this.saveSession();
-
+        this.appendTimelineItem(event);
+        this.renderStats();
     }
 
     generateSessionId() {
