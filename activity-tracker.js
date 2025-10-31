@@ -2,8 +2,61 @@ class ActivityTracker {
     // TODO
 
     constructor() {
-        this.initWidget();
+        // Session Configuration Settings
+        this.STORAGE_KEY = 'activity-tracker-data';
+        this.SESSION_TIMEOUT = 60 * 60 * 1000;
+
+        // Load or Generate new session
+        this.sessionData = this.loadOrGenerateSession();
+
+        this.renderWidget();
         this.addUpEventListeners();
+    }
+
+    loadOrGenerateSession() {
+        const storedSession = localStorage.getItem(this.STORAGE_KEY);
+
+        if (storedSession) {
+
+            const data = JSON.parse(storedSession);
+            const now = Date.now();
+
+            // Check if session expired, create new if so
+            if (now - data.lastActivity > this.SESSION_TIMEOUT) {
+                return this.createNewSession();
+            }
+
+            data.lastActivity = now;
+            this.saveSession(data);
+            return data;
+
+        } else {
+            return this.createNewSession();
+        }
+    }
+
+    createNewSession() {
+        const sessionData = {
+            sessionId: this.generateSessionId(),
+            startedAt: Date.now(),
+            lastActivity: Date.now(),
+            events: [
+                {
+                    "type": "pageview", "page": "index.html", "time": 1727895123456
+                },
+                {
+                    "type": "interaction", "details": "Clicked link: Shop Now", "time": 1727895130000
+                }
+            ],
+        };
+
+        this.saveSession(sessionData);
+        return sessionData;
+    }
+
+
+    saveSession(data = this.sessionData) {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
     }
 
     addUpEventListeners() {
@@ -15,7 +68,21 @@ class ActivityTracker {
         });
     }
 
-    initWidget() {
+    generateSessionId() {
+        const timestamp = Date.now();
+        const random = Math.random().toString(36).slice(2, 8);
+        return `session_${timestamp}_${random}`;
+    }
+
+    formatTime(date) {
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    }
+
+
+    renderWidget() {
 
         const widgetHTML = `
         <div class="activity-tracker-widget">
@@ -27,8 +94,8 @@ class ActivityTracker {
                 <header class="timeline-header">
                 <h3>Activity Timeline</h3>
                 <div>
-                    <div>Session ID: session_1234567890_ab12cd</div>
-                    <div>Started: 14:22:18</div>
+                    <div>Session ID: ${this.sessionData.sessionId}</div>
+                    <div>Started: ${this.formatTime(new Date(this.sessionData.startedAt))}</div>
                 </div>
                 </header>
                 <section class="session-stats">
