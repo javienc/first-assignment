@@ -29,14 +29,26 @@ class ActivityTracker {
         // only interactions have details
         const details = events.type === 'pageview' ? `Visited: ${events.page}` : events.details;
 
-        const html = `
-                <div class="timeline-item ${cls}">
-                    <div class="time">${time}</div>
-                    <div class="event-title">${title}</div>
-                    <div class="event-details">${details}</div>
-                </div>`;
+        const item = document.createElement('div');
+        item.className = `timeline-item ${cls}`;
 
-        timeLineElement.innerHTML += html;
+        const timeEl = document.createElement('div');
+        timeEl.className = 'time';
+        timeEl.textContent = time;
+
+        const titleEl = document.createElement('div');
+        titleEl.className = 'event-title';
+        titleEl.textContent = title;
+
+        const detailsEl = document.createElement('div');
+        detailsEl.className = 'event-details';
+        detailsEl.textContent = details;
+
+        item.appendChild(timeEl);
+        item.appendChild(titleEl);
+        item.appendChild(detailsEl);
+
+        timeLineElement.appendChild(item);
     }
 
     renderStats() {
@@ -222,7 +234,11 @@ class ActivityTracker {
             </div>
     `;
 
-        document.body.innerHTML += widgetHTML;
+        const template = document.createElement('template');
+        template.innerHTML = widgetHTML.trim();
+        const widgetRoot = template.content.firstElementChild;
+        // Insert at top of body to avoid full-body reparse and preserve existing nodes
+        document.body.insertBefore(widgetRoot, document.body.firstChild);
     }
 
 }
