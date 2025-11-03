@@ -132,6 +132,17 @@ class ActivityTracker {
                 const label = button.textContent.trim();
                 this.recordInteraction(`Clicked button: ${label}`);
             }
+            // Collapse when area other than inside the widget is clicked
+            const widget = document.querySelector('.activity-tracker-widget');
+            const timelineEl = document.querySelector('.activity-tracker-timeline');
+            const toggleBtn = document.querySelector('.activity-tracker-button');
+            const clickedInsideWidget = e.target.closest('.activity-tracker-widget');
+            if (timelineEl && timelineEl.classList.contains('expanded')) {
+                const clickedToggle = !!e.target.closest('.activity-tracker-button');
+                if (!clickedInsideWidget && !clickedToggle) {
+                    timelineEl.classList.remove('expanded');
+                }
+            }
         }, true);
 
         document.addEventListener('submit', (e) => {
